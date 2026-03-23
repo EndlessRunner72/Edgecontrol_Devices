@@ -66,6 +66,13 @@
             document.getElementById('status').innerText = "🚫 Connection Closed by Azure.";
         });
 
+        client.on('packetreceive', (packet) => {
+            if (packet.cmd === 'disconnect') {
+                console.log('Azure sent a disconnect packet:', packet);
+                document.getElementById('status').innerText = "Azure Disconnected: Reason Code " + packet.reasonCode;
+            }
+        });
+
         client.on('message', (topic, message) => {
             try {
                 const data = JSON.parse(message.toString());
