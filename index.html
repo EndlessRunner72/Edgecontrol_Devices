@@ -27,7 +27,7 @@
         const deviceId = "web-dashboard-01";
         const sasToken = "SharedAccessSignature sr=edgecontrol-hub-2026.azure-devices.net%2Fdevices%2Fweb-dashboard-01&sig=P7Anza%2FZ6eApwfymjk7rPtVPYzKQMyhWsAgeRojI6og%3D&se=1805710600"; 
 
-        const host = `wss://${hubName}.azure-devices.net:443/mqtt`;
+        const host = `wss://edgecontrol-hub-2026.azure-devices.net:443/mqtt`;
 
         const options = {
             clientId: deviceId,
@@ -49,14 +49,21 @@
             client.subscribe(`devices/${deviceId}/messages/devicebound/#`);
         });
 
-        // NEW: Show specific errors on the screen so you don't need a console
         client.on('error', (err) => {
-            document.getElementById('status').innerText = "MQTT Error: " + err.message;
+            // This will tell us if it's a "Connection Refused" or "Unauthorized" error
+            document.getElementById('status').innerText = "❌ Connection Error: " + err.message;
             document.getElementById('status').style.color = "red";
+            console.error(err);
         });
 
         client.on('offline', () => {
-            document.getElementById('status').innerText = "Status: Offline (Retrying...)";
+            document.getElementById('status').innerText = "⚠️ Status: Offline (Trying to reach Azure...)";
+            document.getElementById('status').style.color = "orange";
+        });
+
+        client.on('close', () => {
+            // If Azure kicks us out, this triggers
+            document.getElementById('status').innerText = "🚫 Connection Closed by Azure.";
         });
 
         client.on('message', (topic, message) => {
