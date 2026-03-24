@@ -27,7 +27,7 @@
         const deviceId = "web-dashboard-01";
         const sasToken = "SharedAccessSignature sr=edgecontrol-hub-2026.azure-devices.net%2Fdevices%2Fweb-dashboard-01&sig=P7Anza%2FZ6eApwfymjk7rPtVPYzKQMyhWsAgeRojI6og%3D&se=1805710600"; 
 
-        const host = `wss://edgecontrol-hub-2026.azure-devices.net:443/mqtt`;
+        const host = `wss://${hubName}.azure-devices.net:443/$iothub/websocket?iothub-no-client-cert=true`;
 
         const options = {
             clientId: deviceId,
