@@ -31,7 +31,7 @@
 
         const options = {
             clientId: deviceId,
-            username: `${hubName}.azure-devices.net/${deviceId}?api-version=2021-04-12`,
+            username: `${hubName}.azure-devices.net/${deviceId}/?api-version=2021-04-12`,
             password: sasToken,
             protocol: 'wss',
             protocolVersion: 4, // Forces MQTT v3.1.1 (Required by Azure)
