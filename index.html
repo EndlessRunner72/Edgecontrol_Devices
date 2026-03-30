@@ -46,11 +46,7 @@
             document.getElementById('status').innerText = "Connected to Azure ✅";
             document.getElementById('status').style.color = "green";
             // This subscribes to messages specifically routed TO this web device
-            client.subscribe(`devices/${deviceId}/messages/devicebound/#`, { qos: 1 }, (err) => {
-                if (!err) {
-                    console.log("Subscribed with QoS 1");
-                }
-            });
+            client.subscribe(`devices/${deviceId}/messages/devicebound/#`);
         });
 
         client.on('error', (err) => {
