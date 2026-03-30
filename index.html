@@ -81,7 +81,11 @@
             try {
                 const data = JSON.parse(message.toString());
                 if (data.buttonClicks !== undefined) {
-                    document.getElementById('clickLabel').innerText = data.buttonClicks;
+                    const currentCount = parseInt(document.getElementById('clickLabel').innerText) || 0;        
+                    // Only update if the new number is greater than the current one
+                    if (data.buttonClicks > currentCount) {
+                        document.getElementById('clickLabel').innerText = data.buttonClicks;
+                    }
                 }
             } catch (e) {
                 console.error("JSON Parse Error", e);
