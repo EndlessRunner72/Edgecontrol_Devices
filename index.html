@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Button Dashboard</title>
+    <title>ESP32 Fleet Dashboard</title>
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
-        .card { background: white; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        #clickLabel { font-size: 60px; color: #0078d4; font-weight: bold; margin: 20px 0; }
-        #status { color: #666; font-size: 14px; }
+        body { font-family: sans-serif; text-align: center; padding-top: 30px; background: #f4f4f4; }
+        /* Status Bar Styling */
+        #status { margin-bottom: 30px; font-weight: bold; font-size: 16px; color: #666; }
+        /* Container for multiple cards */
+        #dashboard-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+        /* Individual Card Styling */
+        .card { background: white; padding: 30px; border-radius: 15px; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .clickLabel { font-size: 60px; color: #0078d4; font-weight: bold; margin: 15px 0; }
     </style>
 </head>
 <body>
+    
+    <div id="status">🔄 Initializing Connection...</div>
 
-    <div class="card">
-        <h2>ESP32 Live Counter</h2>
-        <div id="clickLabel">--</div>
-        <p>Total Clicks</p>
-        <div id="status">Connecting to Azure...</div>
-    </div>
+    <div id="dashboard-container"></div>
 
     <script>
         // 1. CONFIGURATION
@@ -34,26 +36,24 @@
             username: `${hubName}.azure-devices.net/${deviceId}/?api-version=2021-04-12`,
             password: sasToken,
             protocol: 'wss',
-            protocolVersion: 4, // Forces MQTT v3.1.1 (Required by Azure)
-            clean: true,        // Ensures a fresh session
-            rejectUnauthorized: false // Helps bypass some mobile browser cert quirks
+            protocolVersion: 4,
+            clean: true,
+            rejectUnauthorized: false
         };
 
-        // 2. CONNECTION LOGIC
         const client = mqtt.connect(host, options);
 
+        // 2. STATUS UPDATES
         client.on('connect', () => {
-            document.getElementById('status').innerText = "Connected to Azure ✅";
-            document.getElementById('status').style.color = "green";
-            // This subscribes to messages specifically routed TO this web device
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "Connected to Azure ✅";
+            statusDiv.style.color = "green";
             client.subscribe(`devices/${deviceId}/messages/devicebound/#`);
         });
 
         client.on('error', (err) => {
-            // This will tell us if it's a "Connection Refused" or "Unauthorized" error
             document.getElementById('status').innerText = "❌ Connection Error: " + err.message;
             document.getElementById('status').style.color = "red";
-            console.error(err);
         });
 
         client.on('offline', () => {
@@ -61,30 +61,39 @@
             document.getElementById('status').style.color = "orange";
         });
 
-        client.on('close', () => {
-            // If Azure kicks us out, this triggers
-            document.getElementById('status').innerText = "🚫 Connection Closed by Azure.";
-        });
-
-        client.on('packetreceive', (packet) => {
-            if (packet.cmd === 'disconnect') {
-                console.log('Azure sent a disconnect packet:', packet);
-                document.getElementById('status').innerText = "Azure Disconnected: Reason Code " + packet.reasonCode;
-            }
-        });
-
+        // 3. MULTI-DEVICE MESSAGE LOGIC
         client.on('message', (topic, message) => {
             try {
-                const data = JSON.parse(message.toString());
-                if (data.buttonClicks !== undefined) {
-                    const currentCount = parseInt(document.getElementById('clickLabel').innerText) || 0;        
-                    // Only update if the new number is greater than the current one
-                    if (data.buttonClicks > currentCount) {
-                        document.getElementById('clickLabel').innerText = data.buttonClicks;
+                const payload = JSON.parse(message.toString());
+                const { buttonClicks, senderId } = payload; // Logic App must send these keys
+
+                if (senderId && buttonClicks !== undefined) {
+                    let card = document.getElementById(`card-${senderId}`);
+
+                    // Create card if it doesn't exist
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.id = `card-${senderId}`;
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <h3 style="color: #444; margin-bottom: 0;">Device</h3>
+                            <small style="color: #888;">${senderId}</small>
+                            <div id="label-${senderId}" class="clickLabel">--</div>
+                            <p style="margin: 0; color: #666;">Total Clicks</p>
+                        `;
+                        document.getElementById('dashboard-container').appendChild(card);
+                    }
+
+                    // Update label with "Greater Than" check
+                    const label = document.getElementById(`label-${senderId}`);
+                    const currentCount = parseInt(label.innerText) || 0;
+
+                    if (buttonClicks > currentCount) {
+                        label.innerText = buttonClicks;
                     }
                 }
             } catch (e) {
-                console.error("JSON Parse Error", e);
+                console.error("Data Parse Error:", e);
             }
         });
     </script>
