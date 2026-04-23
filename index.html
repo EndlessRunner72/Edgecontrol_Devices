@@ -12,7 +12,21 @@
         /* Container for multiple cards */
         #dashboard-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
         /* Individual Card Styling */
-        .card { background: white; padding: 30px; border-radius: 15px; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 10px;
+            width: 250px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .device-header { font-weight: bold; color: #aaa; margin-bottom: 5px; }
+        .meter-type { color: #4dabf7; font-size: 0.9rem; margin-bottom: 2px; }
+        .device-id { color: #888; font-size: 0.8rem; margin-bottom: 15px; }
+
+        .pulse-count { font-size: 0.9rem; color: #fff; margin-top: 10px; }
+        .kwh-display { font-size: 2.5rem; font-weight: bold; color: #2ecc71; line-height: 1.2; }
+        .cost-display { font-size: 1.3rem; color: #f1c40f; margin-top: 5px; }
         .card:hover { transform: translateY(-5px); }
         .clickLabel { font-size: 60px; color: #0078d4; font-weight: bold; margin: 15px 0; }
     </style>
@@ -65,32 +79,44 @@
         client.on('message', (topic, message) => {
             try {
                 const payload = JSON.parse(message.toString());
-                const { buttonClicks, senderId } = payload; // Logic App must send these keys
+                // We use buttonClicks as our pulse count
+                const { buttonClicks, senderId } = payload; 
 
                 if (senderId && buttonClicks !== undefined) {
+                    // --- 1. LOGIC FOR ID REPLACEMENT ---
+                    let displayId = (senderId === "ubuntu_gateway") ? "GJ34200078" : senderId;
+
+                    // --- 2. CALCULATIONS ---
+                    const pulses = buttonClicks;
+                    const kwh = (pulses / 1000).toFixed(3); // 0.180 format
+                    const inr = (kwh * 10).toFixed(1);      // 1.8 INR format
+
                     let card = document.getElementById(`card-${senderId}`);
+
+                    // --- 3. TEMPLATE FOR THE CARD ---
+                    const cardContent = `
+                        <div class="device-header">Device</div>
+                        <div class="sender-name">${senderId}</div>
+                        <div class="meter-type">1Ph-Energy-Meter</div>
+                        <div class="device-id">ID:${displayId}</div>
+                        <hr style="border: 0.5px solid #444; margin: 10px 0;">
+                        
+                        <div class="pulse-small">${pulses} pulses</div>
+                        <div class="kwh-big">${kwh}</div>
+                        <div class="inr-med">${inr} INR</div>
+                    `;
 
                     // Create card if it doesn't exist
                     if (!card) {
                         card = document.createElement('div');
                         card.id = `card-${senderId}`;
                         card.className = 'card';
-                        card.innerHTML = `
-                            <h3 style="color: #444; margin-bottom: 0;">Device</h3>
-                            <small style="color: #888;">${senderId}</small>
-                            <div id="label-${senderId}" class="clickLabel">--</div>
-                            <p style="margin: 0; color: #666;">Total Clicks</p>
-                        `;
                         document.getElementById('dashboard-container').appendChild(card);
                     }
 
-                    // Update label with "Greater Than" check
-                    const label = document.getElementById(`label-${senderId}`);
-                    const currentCount = parseInt(label.innerText) || 0;
-
-                    if (buttonClicks > currentCount) {
-                        label.innerText = buttonClicks;
-                    }
+                    // Update the card content
+                    // Note: We update every time to ensure kwh/inr stay current
+                    card.innerHTML = cardContent;
                 }
             } catch (e) {
                 console.error("Data Parse Error:", e);
