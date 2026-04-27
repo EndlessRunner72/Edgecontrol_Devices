@@ -10,23 +10,55 @@
         /* Status Bar Styling */
         #status { margin-bottom: 30px; font-weight: bold; font-size: 16px; color: #666; }
         /* Container for multiple cards */
-        #dashboard-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
+/* Container for multiple cards */
+        #dashboard-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 20px; 
+            padding: 20px; 
+        }
+
         /* Individual Card Styling */
         .card {
-            background: #2a2a2a;
+            background: #2a2a2a; /* Dark Card */
             border-radius: 12px;
             padding: 20px;
-            margin: 10px;
-            width: 250px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 260px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: left; /* Aligned left for a professional meter look */
+            transition: transform 0.2s;
         }
-        .device-header { font-weight: bold; color: #aaa; margin-bottom: 5px; }
-        .meter-type { color: #4dabf7; font-size: 0.9rem; margin-bottom: 2px; }
-        .device-id { color: #888; font-size: 0.8rem; margin-bottom: 15px; }
 
-        .pulse-count { font-size: 0.9rem; color: #fff; margin-top: 10px; }
-        .kwh-display { font-size: 2.5rem; font-weight: bold; color: #2ecc71; line-height: 1.2; }
-        .cost-display { font-size: 1.3rem; color: #f1c40f; margin-top: 5px; }
+        .card:hover { transform: translateY(-5px); }
+
+        /* Device Info Styling */
+        .device-header { font-weight: bold; color: #ffffff; margin-bottom: 2px; }
+        .sender-name { color: #888; font-size: 0.8rem; margin-bottom: 10px; display: block;}
+        .meter-type { color: #4dabf7; font-size: 0.9rem; margin-bottom: 2px; font-weight: bold; }
+        .device-id { color: #bbbbbb; font-size: 0.8rem; margin-bottom: 15px; font-family: monospace; }
+
+        /* The Data Displays - Fixed to White/Bright Colors */
+        .pulse-small { 
+            font-size: 0.9rem; 
+            color: #ffffff; /* White text */
+            margin-top: 10px; 
+        }
+        
+        .kwh-big { 
+            font-size: 3rem; 
+            font-weight: bold; 
+            color: #2ecc71; /* Bright Green for energy */
+            line-height: 1.1; 
+            margin: 5px 0;
+        }
+        
+        .inr-med { 
+            font-size: 1.5rem; 
+            font-weight: bold;
+            color: #f1c40f; /* Bright Yellow for money */
+            margin-top: 5px; 
+        }
         .card:hover { transform: translateY(-5px); }
         .clickLabel { font-size: 60px; color: #0078d4; font-weight: bold; margin: 15px 0; }
     </style>
