@@ -116,7 +116,7 @@
 
                 if (senderId && buttonClicks !== undefined) {
                     // --- 1. LOGIC FOR ID REPLACEMENT ---
-                    let displayId = (senderId === "ubuntu_gateway") ? "GJ34200078" : senderId;
+                    let displayId = (senderId === "ubuntu_gateway") ? "GJ34200078" : "GJ34200080";
 
                     // --- 2. CALCULATIONS ---
                     const pulses = buttonClicks;
@@ -128,13 +128,13 @@
                     // --- 3. TEMPLATE FOR THE CARD ---
                     const cardContent = `
                         <div class="device-header">Device</div>
-                        <div class="sender-name">${senderId}</div>
                         <div class="meter-type">1Ph-Energy-Meter</div>
                         <div class="device-id">ID:${displayId}</div>
                         <hr style="border: 0.5px solid #444; margin: 10px 0;">
                         
-                        <div class="pulse-small">${pulses} pulses</div>
-                        <div class="kwh-big">${kwh}</div>
+                        <div class="pulse-small">${pulses} Energy pulses</div>
+                        <div class="kwh-big">${kwh} kWh</div>
+                        <div class="pulse-small">Slab Tariff: 10.00 INR</div>
                         <div class="inr-med">${inr} INR</div>
                     `;
 
